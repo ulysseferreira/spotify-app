@@ -14,6 +14,7 @@
 <script src="https://unpkg.com/react@17/umd/react.development.js"></script>
 <script src="https://unpkg.com/react-dom@17/umd/react-dom.development.js"></script>
 <script src="https://cdn.jsdelivr.net/npm/axios/dist/axios.min.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/lodash@4.17.21"></script>
 
 
 <!-- Babel for JSX transformation -->
@@ -27,7 +28,11 @@
         accessToken: '',
         randomTrack: null,
         uniqueTracks: [],
+        progress: 0,
       };
+      this.users = ['userid', 'userid'];
+      this.clientId = 'INSERT_CLIENT_ID';
+      this.list = ['Nom Spotify des participants', 'Nom Spotify des participants'];
     }
 
     componentDidMount() {
@@ -47,11 +52,10 @@
     };
 
     async handleLogin() {
-      const clientId = 'INSERT_CLIENT_ID';
       const redirectUri = 'http://localhost:3000';
 
       const authUrl = `https://accounts.spotify.com/authorize?` +
-        `client_id=${clientId}&` +
+        `client_id=${this.clientId}&` +
         `redirect_uri=${encodeURIComponent(redirectUri)}&` +
         `response_type=token&`;
 
@@ -60,11 +64,9 @@
     };
 
     async loadTracks(accessToken) {
-      const users = ['userid', 'userid'];
-
-      const promises = users
+      const promises = this.users
         .map(user => axios.get(
-          `https://api.spotify.com/v1/users/${user}/playlists?limit=2`,
+          `https://api.spotify.com/v1/users/${user}/playlists`,
           {headers: {'Authorization': 'Bearer ' + accessToken}}
         )
       );
@@ -76,24 +78,25 @@
           responses.forEach(response => { playlists.push(...response.data.items) })
         });
 
-      for (const playlist of playlists) {
-        const user = playlist.owner.display_name;
-        const list = ['Nom Spotify des participants', 'Nom Spotify des participants'];
-        
-        if (!list.includes(user)) continue;
-        await axios.get(`${playlist.tracks.href}`, {headers: {'Authorization': 'Bearer ' + accessToken }})
+      for (let i = 0; i < playlists.length; i++) {
+        this.setState({progress: (i/playlists.length * 100)});
+        const user = playlists[i].owner.display_name;        
+        if (!this.list.includes(user)) continue;
+        await axios.get(`${playlists[i].tracks.href}`, {headers: {'Authorization': 'Bearer ' + accessToken }})
           .then(response => 
-            response.data.items.forEach(item => tracks.push({track: item.track.external_urls.spotify, user}))
+            response.data.items.forEach(item => _.get(item, 'track.external_urls.spotify') && tracks.push({track: _.get(item, 'track.external_urls.spotify'), user}))
           );
       }
 
       const trackIds = tracks.map(t => t.track);
+      const counter =  this.list.reduce((acc, user) => { acc[user] = 0; return acc; }, {});
       const uniqueTracks = tracks.filter((track, index) => {
-        const list = trackIds.splice(index, 1);
-        return !list.includes(track.track)
+        const listWithoutTrack = trackIds.splice(index, 1);
+        counter[track.user] +=1;
+        
+        return !listWithoutTrack.includes(track.track) && counter[track.user] < 200
       });
       this.setState({ uniqueTracks });
-
       return uniqueTracks
     };
 
@@ -109,8 +112,8 @@
     }
 
     render() {
-      const { accessToken, randomTrack, uniqueTracks } = this.state;
-      if (!accessToken) return <button onClick={this.handleLogin}>Login with Spotify</button>;
+      const { accessToken, randomTrack, uniqueTracks, progress } = this.state;
+      if (!accessToken) return <button onClick={() => this.handleLogin()}>Login with Spotify</button>;
 
       return (
         <div className="container">
@@ -136,7 +139,8 @@
             <div>
               <div className="loading">
                 <span className="spinner"></span>Chargement des playlists...
-              </div>
+                </div>
+                <p>{progress.toFixed(1)}%</p>
             </div>
           )}
         </div>
