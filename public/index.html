@@ -3,7 +3,8 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>React in HTML</title>
+  <title>Spotify Random</title>
+  <link rel="stylesheet" href="styles.css">
 </head>
 <body>
 
@@ -52,8 +53,7 @@
       const authUrl = `https://accounts.spotify.com/authorize?` +
         `client_id=${clientId}&` +
         `redirect_uri=${encodeURIComponent(redirectUri)}&` +
-        `response_type=token&` +
-        `scope=user-read-private%20user-read-email`;
+        `response_type=token&`;
 
       // Redirect the user to Spotify for authentication
       window.location.href = authUrl;
@@ -106,7 +106,6 @@
       const randomTrack = test[Math.floor(Math.random() * test.length)];
       randomTrack.track = randomTrack.track.replace('/track/', '/embed/track/');
       this.setState({ randomTrack });
-
     }
 
     render() {
@@ -114,21 +113,31 @@
       if (!accessToken) return <button onClick={this.handleLogin}>Login with Spotify</button>;
 
       return (
-        <div>
+        <div className="container">
           {uniqueTracks.length ? (
             <div>
               {randomTrack ? 
                 <div>
-                  <h2>Track aléatoire</h2>
-                  <p>(<strong>nom:</strong> {randomTrack.user})</p>
-                  <iframe src={`${randomTrack.track}?utm_source=oembeded"`} loading="lazy" width="50%" height="152" frameBorder="0" allow="autoplay; clipboard-write; encrypted-media; fullscreen; picture-in-picture"></iframe>
+                  <h1>Track aléatoire</h1>
+                  <div className="user-info">
+                    <p>(Spoiler c'est dans la playlist de : <strong>{randomTrack.user}</strong>)</p>
                   </div>
-                  : <div>Chargement de la track aléatoire...</div>
+                  <iframe src={`${randomTrack.track}?utm_source=oembeded"`} loading="lazy" width="100%" height="152" frameBorder="0" allow="autoplay; clipboard-write; encrypted-media; fullscreen; picture-in-picture"></iframe>
+                </div>
+              : <div>
+                <div className="loading">
+                  <span className="spinner"></span> Chargement de la track aléatoire...
+                </div>
+              </div>
               }
               <button onClick={() => this.getRandomTrack(accessToken, uniqueTracks)}>New track</button>
             </div>
           ) : (
-            <div>Chargement des playlists...</div>
+            <div>
+              <div className="loading">
+                <span className="spinner"></span>Chargement des playlists...
+              </div>
+            </div>
           )}
         </div>
       );

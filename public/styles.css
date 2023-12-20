@@ -1,0 +1,95 @@
+/* styles.css */
+
+body {
+  font-family: 'Arial', sans-serif;
+  background-color: #2d2d2d;
+  margin: 0;
+  padding: 0;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  height: 100vh;
+  color: white;
+}
+
+.container {
+  text-align: center;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+}
+
+h2 {
+  color: #61dafb;
+}
+
+iframe {
+  border: none; /* Remove border around iframe */
+  border-radius: 5px;
+  margin-top: 10px;
+}
+
+button {
+  background-color: #61dafb;
+  color: white;
+  padding: 10px 20px;
+  font-size: 16px;
+  cursor: pointer;
+  border: none;
+  border-radius: 5px;
+  margin-top: 20px;
+}
+
+button:hover {
+  background-color: #4fa3d1;
+}
+
+/* Loading Animation */
+@keyframes rotate {
+  from {
+    transform: rotate(0deg);
+  }
+  to {
+    transform: rotate(360deg);
+  }
+}
+
+.loading {
+  margin-top: 20px;
+  font-size: 18px;
+  text-align: center; /* Center the text */
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  height: 40px; /* Set a fixed height for better centering */
+}
+
+.spinner {
+  display: inline-block;
+  border: 4px solid rgba(255, 255, 255, 0.3);
+  border-radius: 50%;
+  border-top: 4px solid #61dafb;
+  width: 20px;
+  height: 20px;
+  animation: rotate 1s linear infinite;
+  margin-right: 8px; /* Adjust the margin-right as needed */
+}
+
+.user-info {
+  margin-top: 15px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.user-info p {
+  margin: 0;
+  font-size: 16px;
+  color: #ccc;
+}
+
+.user-name {
+  margin-left: 8px;
+  font-size: 18px;
+  color: #61dafb;
+}
