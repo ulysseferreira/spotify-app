@@ -1,0 +1,142 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>React in HTML</title>
+</head>
+<body>
+
+<div id="root"></div>
+
+<!-- React -->
+<script src="https://unpkg.com/react@17/umd/react.development.js"></script>
+<script src="https://unpkg.com/react-dom@17/umd/react-dom.development.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/axios/dist/axios.min.js"></script>
+
+
+<!-- Babel for JSX transformation -->
+<script src="https://unpkg.com/babel-standalone@6/babel.min.js"></script>
+
+<script type="text/babel">
+  class App extends React.Component {
+    constructor(props) {
+      super(props);
+      this.state = {
+        accessToken: '',
+        randomTrack: null,
+        uniqueTracks: [],
+      };
+    }
+
+    componentDidMount() {
+      this.handleAuthResponse();
+    }
+
+    async handleAuthResponse () {
+      // Check if the URL contains an access token in the fragment
+      const params = new URLSearchParams(window.location.hash.substr(1));
+      const accessToken = params.get('access_token');
+
+      if (accessToken) {
+        // You have the access token, you can now use it or store it
+        this.setState({ accessToken: accessToken });
+        await this.getRandomTrack(accessToken);
+      }
+    };
+
+    async handleLogin() {
+      const clientId = 'INSERT_CLIENT_ID';
+      const redirectUri = 'http://localhost:3000';
+
+      const authUrl = `https://accounts.spotify.com/authorize?` +
+        `client_id=${clientId}&` +
+        `redirect_uri=${encodeURIComponent(redirectUri)}&` +
+        `response_type=token&` +
+        `scope=user-read-private%20user-read-email`;
+
+      // Redirect the user to Spotify for authentication
+      window.location.href = authUrl;
+    };
+
+    async loadTracks(accessToken) {
+      const users = ['userid', 'userid'];
+
+      const promises = users
+        .map(user => axios.get(
+          `https://api.spotify.com/v1/users/${user}/playlists?limit=2`,
+          {headers: {'Authorization': 'Bearer ' + accessToken}}
+        )
+      );
+      const playlists = []
+      const tracks = [];
+      
+      await Promise.all(promises)
+        .then(responses => {
+          responses.forEach(response => { playlists.push(...response.data.items) })
+        });
+
+      for (const playlist of playlists) {
+        const user = playlist.owner.display_name;
+        const list = ['Nom Spotify des participants', 'Nom Spotify des participants'];
+        
+        if (!list.includes(user)) continue;
+        await axios.get(`${playlist.tracks.href}`, {headers: {'Authorization': 'Bearer ' + accessToken }})
+          .then(response => 
+            response.data.items.forEach(item => tracks.push({track: item.track.external_urls.spotify, user}))
+          );
+      }
+
+      const trackIds = tracks.map(t => t.track);
+      const uniqueTracks = tracks.filter((track, index) => {
+        const list = trackIds.splice(index, 1);
+        return !list.includes(track.track)
+      });
+      this.setState({ uniqueTracks });
+
+      return uniqueTracks
+    };
+
+    async getRandomTrack(accessToken, stateUniqueTracks = []) {
+      let test = stateUniqueTracks;
+      if (stateUniqueTracks.length === 0) {
+        const uniqueTracks = await this.loadTracks(accessToken);
+        test = uniqueTracks;
+      }
+      const randomTrack = test[Math.floor(Math.random() * test.length)];
+      randomTrack.track = randomTrack.track.replace('/track/', '/embed/track/');
+      this.setState({ randomTrack });
+
+    }
+
+    render() {
+      const { accessToken, randomTrack, uniqueTracks } = this.state;
+      if (!accessToken) return <button onClick={this.handleLogin}>Login with Spotify</button>;
+
+      return (
+        <div>
+          {uniqueTracks.length ? (
+            <div>
+              {randomTrack ? 
+                <div>
+                  <h2>Track aléatoire</h2>
+                  <p>(<strong>nom:</strong> {randomTrack.user})</p>
+                  <iframe src={`${randomTrack.track}?utm_source=oembeded"`} loading="lazy" width="50%" height="152" frameBorder="0" allow="autoplay; clipboard-write; encrypted-media; fullscreen; picture-in-picture"></iframe>
+                  </div>
+                  : <div>Chargement de la track aléatoire...</div>
+              }
+              <button onClick={() => this.getRandomTrack(accessToken, uniqueTracks)}>New track</button>
+            </div>
+          ) : (
+            <div>Chargement des playlists...</div>
+          )}
+        </div>
+      );
+    }
+  }
+
+  ReactDOM.render(<App />, document.getElementById('root'));
+</script>
+
+</body>
+</html>
