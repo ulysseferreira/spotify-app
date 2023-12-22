@@ -93,3 +93,23 @@ button:hover {
   font-size: 18px;
   color: #61dafb;
 }
+
+.checkbox-container {
+  display: flex;
+  width: 50%;
+  flex-wrap: wrap;
+}
+
+.checkbox-item {
+  margin-right: 16px;
+  margin-bottom: 16px;
+}
+
+.checkbox-label {
+  display: flex;
+  align-items: center;
+}
+
+.checkbox-label input {
+  margin-right: 8px;
+}
