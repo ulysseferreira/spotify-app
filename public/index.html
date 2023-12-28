@@ -24,16 +24,20 @@
   class App extends React.Component {
     constructor(props) {
       super(props);
+      this.users = [
+        {username: 'username',label: 'User Label', value: 'value'},
+        {username: 'username',label: 'User Label', value: 'value'},
+      ];
+      this.clientId = 'INSERT_CLIENT_ID';
       this.state = {
         accessToken: '',
         randomTrack: null,
         uniqueTracks: [],
         selectedTracks: [],
-        selectedUsernames: [],
+        showUserInfo: false,
+        selectedUsernames: this.users.map(u => u.username),
         progress: 0,
       };
-      this.users = ['userid', 'userid'];
-      this.clientId = 'INSERT_CLIENT_ID';
     }
 
     componentDidMount() {
@@ -122,14 +126,28 @@
       this.setState({ randomTrack });
     }
 
+    getFullName(username) {
+      return _.groupBy(this.users, 'username')[username][0].label;
+    }
+
+    toggleUserInfo = () => {
+      this.setState((prevState) => ({
+        showUserInfo: !prevState.showUserInfo,
+      }));
+    };
+
     render() {
-      const { accessToken, randomTrack, uniqueTracks, selectedUsernames, selectedTracks, progress } = this.state;
-      if (!accessToken) return <button onClick={() => this.handleLogin()}>se connecter à Spotify</button>;
+      const { accessToken, randomTrack, uniqueTracks, selectedUsernames, selectedTracks, progress, showUserInfo } = this.state;
+      if (!accessToken) return (
+        <div className="container">  
+          <button onClick={() => this.handleLogin()}>se connecter à Spotify</button>
+        </div>
+      );
 
       return (
         <div className="container">
           {uniqueTracks.length ? (
-            <div>
+            <div className="track-container">
               {randomTrack ? 
                 <div>
                   <h1>Track aléatoire</h1>
@@ -146,10 +164,16 @@
                         </label>
                       </div>
                     ))}
-                  </div>
+                    </div>
+                    <label className="checkbox-label">
+                      <input type="checkbox" checked={showUserInfo} onChange={this.toggleUserInfo} />
+                      Afficher la personne
+                    </label>
+                  {showUserInfo && (
                   <div className="user-info">
-                    <p>(Spoiler c'est dans la playlist de : <strong>{randomTrack.user}</strong>)</p>
+                    <p>(Spoiler c'est dans la playlist de : <strong>{this.getFullName(randomTrack.user)}</strong>)</p>
                   </div>
+                  )}
                   <iframe src={`${randomTrack.track}?utm_source=oembeded"`} loading="lazy" width="100%" height="152" frameBorder="0" allow="autoplay; clipboard-write; encrypted-media; fullscreen; picture-in-picture"></iframe>
                 </div>
               : <div>
@@ -161,12 +185,10 @@
               <button onClick={() => this.getRandomTrack(accessToken, selectedTracks)}>New track</button>
             </div>
           ) : (
-            <div>
               <div className="loading">
-                <span className="spinner"></span>Chargement des playlists...
-                </div>
-                <p>{progress.toFixed(1)}%</p>
-            </div>
+                <div><span className="spinner"></span>Chargement des playlists...</div>
+                <div >{progress.toFixed(1)}%</div>
+              </div>
           )}
         </div>
       );
