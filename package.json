@@ -6,7 +6,8 @@
     "your-app": "server.js"
   },
   "scripts": {
-    "build": "pkg . --targets=node14-win-x64,node14-linux-x64,node14-macos-x64 --output dist/app"
+    "build": "pkg . --targets=node14-win-x64,node14-linux-x64,node14-macos-x64 --output dist/app",
+    "start": "node server.js"
   },
   "dependencies": {
     "express": "^4.18.2",

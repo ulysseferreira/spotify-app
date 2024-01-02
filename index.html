@@ -57,7 +57,7 @@
     };
 
     async handleLogin() {
-      const redirectUri = 'http://localhost:3006';
+      const redirectUri = 'https://transcendent-kheer-f2f706.netlify.app';
 
       const authUrl = `https://accounts.spotify.com/authorize?` +
         `client_id=${this.clientId}&` +
@@ -102,7 +102,7 @@
           );
       }
 
-      const trackIds = tracks.map(t => t.track);
+      const trackIds = tracks.map(t => ({ track: t.track, sort: Math.random() })).sort((a, b) => a.sort - b.sort).map(({ track }) => track);
       const counter =  this.users.map(user => user.username).reduce((acc, user) => { acc[user] = 0; return acc; }, {});
       const uniqueTracks = tracks.filter((track, index) => {
         const listWithoutTrack = trackIds.splice(index, 1);
@@ -139,7 +139,7 @@
     render() {
       const { accessToken, randomTrack, uniqueTracks, selectedUsernames, selectedTracks, progress, showUserInfo } = this.state;
       if (!accessToken) return (
-        <div className="container">  
+        <div className="load-container">  
           <button onClick={() => this.handleLogin()}>se connecter à Spotify</button>
         </div>
       );
@@ -150,7 +150,7 @@
             <div className="track-container">
               {randomTrack ? 
                 <div>
-                  <h1>Track aléatoire</h1>
+                  <h1>Chanson aléatoire</h1>
                   <div className="checkbox-container">
                     {this.users.map((user) => (
                       <div key={user.username} className="checkbox-item">
@@ -178,11 +178,11 @@
                 </div>
               : <div>
                 <div className="loading">
-                  <span className="spinner"></span> Chargement de la track aléatoire...
+                  <span className="spinner"></span> Chargement de la chanson aléatoire...
                 </div>
               </div>
               }
-              <button onClick={() => this.getRandomTrack(accessToken, selectedTracks)}>New track</button>
+              <button onClick={() => this.getRandomTrack(accessToken, selectedTracks)}>Nouvelle chanson</button>
             </div>
           ) : (
               <div className="loading">

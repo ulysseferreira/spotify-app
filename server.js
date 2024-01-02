@@ -1,12 +1,10 @@
 const http = require('http');
 const fs = require('fs');
 const path = require('path');
-const opn = require('opn');
 
 const server = http.createServer((req, res) => {
   if (req.url === '/styles.css') {
     const cssPath = path.join(__dirname, './public/styles.css');
-    
     fs.readFile(cssPath, 'utf8', (err, data) => {
       if (err) {
         console.error('Error reading CSS file:', err);
@@ -33,7 +31,8 @@ const server = http.createServer((req, res) => {
   }
 });
 
-server.listen(3006, () => {
-  console.log('Server is running on http://localhost:3006');
-  opn('http://localhost:3006');
+const port = process.env.PORT || 3006;
+
+server.listen(port, () => {
+  console.log(`Server is running on http://localhost:${port}`);
 });

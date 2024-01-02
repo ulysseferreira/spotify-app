@@ -5,13 +5,23 @@ body {
   background-color: #2d2d2d;
 }
 
+.load-container {
+  display: flex;
+  justify-content: center;
+  margin: 0;
+  padding: 0;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  height: 100vh;
+  color: white;
+}
 .container {
   display: flex;
   justify-content: center;
   margin: 0;
   padding: 0;
   display: flex;
-  align-items: center;
   justify-content: center;
   height: 100vh;
   color: white;
